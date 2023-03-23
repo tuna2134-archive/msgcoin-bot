@@ -36,10 +36,24 @@ impl EventHandler for Handler {
         let data = ctx.data.read().await;
         let pool = data.get::<PoolContainer>().unwrap();
         let pool = pool.lock().await;
-        sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
+        let recs = sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
             .fetch_one(&*pool)
-            .await
-            .unwrap();
+            .await;
+        match recs {
+            Ok(rec) => {
+                let point = rec.Point.unwrap() + 1;
+                sqlx::query!("UPDATE Point SET Point = ? WHERE UserId = ?", point, msg.author.id.0)
+                    .execute(&*pool)
+                    .await
+                    .unwrap();
+            },
+            Err(_) => {
+                sqlx::query!("INSERT INTO Point(UserId, Point) VALUES(?, ?)", msg.author.id.0, 1)
+                    .execute(&*pool)
+                    .await
+                    .unwrap();
+            }
+        }
     }
 }
 
