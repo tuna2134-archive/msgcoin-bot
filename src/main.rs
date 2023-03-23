@@ -18,10 +18,17 @@ impl TypeMapKey for PoolContainer {
 }
 
 #[group]
-#[commands(ping)]
+#[commands(ping, check)]
 struct General;
 
 struct Handler;
+
+async fn get_pool(ctx: &Context) -> MySqlPool {
+    let data = ctx.data.read().await;
+    let pool_locked = data.get::<PoolContainer>().unwrap();
+    let pool = pool_locked.lock().await;
+    pool.clone()
+}
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -91,5 +98,23 @@ async fn main() {
 async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     msg.reply(ctx, "Pong!").await?;
 
+    Ok(())
+}
+
+#[command]
+async fn check(ctx: &Context, msg: &Message) -> CommandResult {
+    let pool = get_pool(&ctx).await;
+    let recs = sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
+        .fetch_one(&pool)
+        .await;
+    match recs {
+        Ok(rec) => {
+            let point = rec.Point.unwrap();
+            msg.reply(ctx, format!("あなたのポイントは{}です。", point)).await?;
+        },
+        Err(_) => {
+            msg.reply(ctx, "あなたはまだポイントを持っていません").await?;
+        }
+    }
     Ok(())
 }
