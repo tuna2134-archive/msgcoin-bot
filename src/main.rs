@@ -4,10 +4,7 @@ use std::sync::Arc;
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
 use serenity::framework::standard::{CommandResult, StandardFramework};
-use serenity::model::{
-    channel::Message,
-    gateway::{Ready},
-};
+use serenity::model::{channel::Message, gateway::Ready};
 use serenity::prelude::*;
 use sqlx::mysql::MySqlPool;
 use tokio::sync::Mutex;
@@ -38,9 +35,9 @@ impl EventHandler for Handler {
         }
         let data = ctx.data.read().await;
         let pool = data.get::<PoolContainer>().unwrap();
-        let mut pool = pool.lock().await;
+        let pool = pool.lock().await;
         sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
-            .fetch_one(&mut *pool)
+            .fetch_one(&*pool)
             .await
             .unwrap();
     }
@@ -53,6 +50,7 @@ async fn main() {
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap())
         .await
         .expect("Ok");
+    sqlx::migrate!().run(&pool).await.unwrap();
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~")) // set the bot's prefix to "~"
         .group(&GENERAL_GROUP);

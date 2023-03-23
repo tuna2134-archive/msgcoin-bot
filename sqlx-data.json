@@ -1,0 +1,28 @@
+{
+  "db": "MySQL",
+  "70763e0d8de03c9f8b9a9768578ca0f2f5ad30bae6034c82c941ae74277001c5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "Point",
+          "ordinal": 0,
+          "type_info": {
+            "char_set": 63,
+            "flags": {
+              "bits": 0
+            },
+            "max_size": 11,
+            "type": "Long"
+          }
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT Point FROM Point WHERE UserId = ?"
+  }
+}
