@@ -1,4 +1,5 @@
 use std::env;
+use std::sync::Arc;
 
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
@@ -9,8 +10,15 @@ use serenity::model::{
 };
 use serenity::prelude::*;
 use sqlx::mysql::MySqlPool;
+use tokio::sync::Mutex;
 
 use dotenv::dotenv;
+
+struct PoolContainer;
+
+impl TypeMapKey for PoolContainer {
+    type Value = Arc<Mutex<MySqlPool>>;
+}
 
 #[group]
 #[commands(ping)]
@@ -22,6 +30,19 @@ struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, _ctx: Context, ready: Ready) {
         log::info!("{} is connected!", ready.user.name);
+    }
+
+    async fn message(&self, ctx: Context, msg: Message) {
+        if msg.author.bot {
+            return;
+        }
+        let data = ctx.data.read().await;
+        let pool = data.get::<PoolContainer>().unwrap();
+        let mut pool = pool.lock().await;
+        sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
+            .fetch_one(&mut *pool)
+            .await
+            .unwrap();
     }
 }
 
@@ -44,7 +65,10 @@ async fn main() {
         .framework(framework)
         .await
         .expect("Error creating client");
-
+    {
+        let mut data = client.data.write().await;
+        data.insert::<PoolContainer>(Arc::new(Mutex::new(pool)));
+    }
     // start listening for events by starting a single shard
     if let Err(why) = client.start().await {
         println!("An error occurred while running the client: {:?}", why);
