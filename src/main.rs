@@ -64,7 +64,7 @@ async fn main() {
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap())
         .await
         .expect("Ok");
-    sqlx::migrate!().run(&pool).await.unwrap();
+    sqlx::migrate!("./migrations").run(&pool).await.unwrap();
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~")) // set the bot's prefix to "~"
         .group(&GENERAL_GROUP);
