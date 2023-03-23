@@ -8,6 +8,7 @@ use serenity::model::{
     gateway::{Ready},
 };
 use serenity::prelude::*;
+use sqlx::mysql::MySqlPool;
 
 use dotenv::dotenv;
 
@@ -28,6 +29,9 @@ impl EventHandler for Handler {
 async fn main() {
     env_logger::init();
     dotenv().ok();
+    let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap())
+        .await
+        .expect("Ok");
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~")) // set the bot's prefix to "~"
         .group(&GENERAL_GROUP);
