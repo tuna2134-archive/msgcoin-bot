@@ -4,7 +4,11 @@ use std::sync::Arc;
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
 use serenity::framework::standard::{CommandResult, StandardFramework};
-use serenity::model::{channel::Message, gateway::Ready};
+use serenity::model::{
+    channel::Message, gateway::Ready,
+    guild::Member,
+    id::ChannelId,
+};
 use serenity::prelude::*;
 use sqlx::mysql::MySqlPool;
 use tokio::sync::Mutex;
@@ -86,6 +90,32 @@ impl EventHandler for Handler {
                 .execute(&pool)
                 .await
                 .unwrap();
+            }
+        }
+    }
+    async fn guild_member_addition(&self, ctx: Context, member: Member) {
+        let pool = get_pool(&ctx).await;
+        let recs = sqlx::query!("SELECT * FROM Welcome WHERE GuildId = ?", member.guild_id.0)
+            .fetch_one(&pool)
+            .await;
+        match recs {
+            Ok(rec) => {
+                let channel_id = rec.ChannelId.unwrap();
+                let channel = ChannelId {
+                    0: channel_id as u64,
+                };
+                let channel = ctx.cache.guild_channel(channel);
+                match channel {
+                    Some(channel) => {
+                        channel.say(ctx, rec.Message.unwrap()).await.unwrap();
+                    },
+                    None => {
+                        log::error!("チャンネルが見つかりませんでした。");
+                    }
+                }
+            },
+            Err(_) => {
+                log::error!("データがないぞい");
             }
         }
     }

@@ -55,6 +55,57 @@
     },
     "query": "UPDATE User SET Level = ?, Point = ? WHERE Userid = ?"
   },
+  "8b99be4bb01337ece1147e27475e568e7f27057b82b42e2aaf6c5dcd57d3f941": {
+    "describe": {
+      "columns": [
+        {
+          "name": "GuildId",
+          "ordinal": 0,
+          "type_info": {
+            "char_set": 63,
+            "flags": {
+              "bits": 0
+            },
+            "max_size": 20,
+            "type": "LongLong"
+          }
+        },
+        {
+          "name": "ChannelId",
+          "ordinal": 1,
+          "type_info": {
+            "char_set": 63,
+            "flags": {
+              "bits": 0
+            },
+            "max_size": 20,
+            "type": "LongLong"
+          }
+        },
+        {
+          "name": "Message",
+          "ordinal": 2,
+          "type_info": {
+            "char_set": 224,
+            "flags": {
+              "bits": 16
+            },
+            "max_size": 262140,
+            "type": "Blob"
+          }
+        }
+      ],
+      "nullable": [
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT * FROM Welcome WHERE GuildId = ?"
+  },
   "b1a524f2a6c0594745b2de1459d24bc38cc934dcda556fc04cd7105e790cad47": {
     "describe": {
       "columns": [
