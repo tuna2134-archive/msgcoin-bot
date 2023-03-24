@@ -2,7 +2,8 @@ version: "3"
 
 services:
   bot:
-    image: "ghcr.io/tuna2134/msgcoin-bot"
+    image: "ghcr.io/tuna2134/msgcoin-bot:latest"
     environment:
       DATABASE_URL: ${DATABASE_URL}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
+      RUST_LOG: info

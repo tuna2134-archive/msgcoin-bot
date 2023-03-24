@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msgcoin-mysql
+  labels:
+    app: msgcoin-mysql
+spec:
+  selector:
+    matchLabels:
+      app: msgcoin-mysql
+  template:
+    metadata:
+      labels:
+        app: msgcoin-mysql
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb
+        env:
+        - name: MARIADB_ROOT_PASSWORD
+          value: mariadb
+        - name: MARIADB_DATABASE
+          value: msgcoin
+        - name: MARIADB_USER
+          value: msgcoin
+        - name: MARIADB_PASSWORD
+          value: msgcoin
+        ports:
+        - containerPort: 3306
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msgcoin-bot
+  labels:
+    app: msgcoin-bot
+spec:
+  selector:
+    matchLabels:
+      app: msgcoin-bot
+  template:
+    metadata:
+      labels:
+        app: msgcoin-bot
+    spec:
+      containers:
+      - name: msgcoin-bot
+        image: ghcr.io/tuna2134/msgcoin-bot
+        env:
+        - name: DATABASE_URL
+          value: mysql://msgcoin:msgcoin@msgcoin-mysql-svc/msgcoin
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: msgcoin-bot
+              key: DISCORD_TOKEN
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msgcoin-mysql-svc
+spec:
+  selector:
+    app: msgcoin-mysql
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
