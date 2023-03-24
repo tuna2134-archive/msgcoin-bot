@@ -4,11 +4,7 @@ use std::sync::Arc;
 use serenity::async_trait;
 use serenity::framework::standard::macros::{command, group};
 use serenity::framework::standard::{CommandResult, StandardFramework};
-use serenity::model::{
-    channel::Message, gateway::Ready,
-    guild::Member,
-    id::ChannelId,
-};
+use serenity::model::{channel::Message, gateway::Ready, guild::Member, id::ChannelId};
 use serenity::prelude::*;
 use sqlx::mysql::MySqlPool;
 use tokio::sync::Mutex;
@@ -101,19 +97,17 @@ impl EventHandler for Handler {
         match recs {
             Ok(rec) => {
                 let channel_id = rec.ChannelId.unwrap();
-                let channel = ChannelId {
-                    0: channel_id as u64,
-                };
+                let channel = ChannelId(channel_id as u64);
                 let channel = ctx.cache.guild_channel(channel);
                 match channel {
                     Some(channel) => {
                         channel.say(ctx, rec.Message.unwrap()).await.unwrap();
-                    },
+                    }
                     None => {
                         log::error!("チャンネルが見つかりませんでした。");
                     }
                 }
-            },
+            }
             Err(_) => {
                 log::error!("データがないぞい");
             }
