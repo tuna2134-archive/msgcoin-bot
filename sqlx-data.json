@@ -1,30 +1,10 @@
 {
   "db": "MySQL",
-  "069a95d66a9fc71003302cd2e0d30ada399934783bb467fb6e7ce5b93a6b0563": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Right": 2
-      }
-    },
-    "query": "INSERT INTO Point(UserId, Point) VALUES(?, ?)"
-  },
-  "1240d257e113b166558d36f8bd65e1976efbe8fc7c79a7123074af9cbf4c5e68": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Right": 2
-      }
-    },
-    "query": "UPDATE Point SET Point = ? WHERE UserId = ?"
-  },
-  "70763e0d8de03c9f8b9a9768578ca0f2f5ad30bae6034c82c941ae74277001c5": {
+  "1d1ff4ada39a5756359b1ccbcb738badcd76f80ca4c5a461d095cbf27d99fd57": {
     "describe": {
       "columns": [
         {
-          "name": "Point",
+          "name": "Level",
           "ordinal": 0,
           "type_info": {
             "char_set": 63,
@@ -43,6 +23,74 @@
         "Right": 1
       }
     },
-    "query": "SELECT Point FROM Point WHERE UserId = ?"
+    "query": "SELECT Level FROM User WHERE UserId = ?"
+  },
+  "22d6ff684826ab086d7cc39d8646e63ce6840d080da5e6bb151673ef2b0e28e8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "INSERT INTO User(UserId, Point, Level) VALUES(?, ?, ?)"
+  },
+  "70d573b0a3885246d55473a62b61bdbff8115e9cefe0b62fb38a95f22ea84116": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "UPDATE User SET Point = ? WHERE UserId = ?"
+  },
+  "75d06186b6f017f17714af0ac2a34719ccd5b93c18dd1eaf9487067517ba1b40": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "UPDATE User SET Level = ?, Point = ? WHERE Userid = ?"
+  },
+  "b1a524f2a6c0594745b2de1459d24bc38cc934dcda556fc04cd7105e790cad47": {
+    "describe": {
+      "columns": [
+        {
+          "name": "Point",
+          "ordinal": 0,
+          "type_info": {
+            "char_set": 63,
+            "flags": {
+              "bits": 0
+            },
+            "max_size": 11,
+            "type": "Long"
+          }
+        },
+        {
+          "name": "Level",
+          "ordinal": 1,
+          "type_info": {
+            "char_set": 63,
+            "flags": {
+              "bits": 0
+            },
+            "max_size": 11,
+            "type": "Long"
+          }
+        }
+      ],
+      "nullable": [
+        true,
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT Point, Level FROM User WHERE UserId = ?"
   }
 }

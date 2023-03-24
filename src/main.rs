@@ -40,25 +40,52 @@ impl EventHandler for Handler {
         if msg.author.bot {
             return;
         }
-        let data = ctx.data.read().await;
-        let pool = data.get::<PoolContainer>().unwrap();
-        let pool = pool.lock().await;
-        let recs = sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
-            .fetch_one(&*pool)
-            .await;
+        let pool = get_pool(&ctx).await;
+        let recs = sqlx::query!(
+            "SELECT Point, Level FROM User WHERE UserId = ?",
+            msg.author.id.0
+        )
+        .fetch_one(&pool)
+        .await;
         match recs {
             Ok(rec) => {
                 let point = rec.Point.unwrap() + 1;
-                sqlx::query!("UPDATE Point SET Point = ? WHERE UserId = ?", point, msg.author.id.0)
-                    .execute(&*pool)
+                let mut level = rec.Level.unwrap();
+                if point >= level * 10 {
+                    level += 1;
+                    msg.reply(ctx, format!("あなたはレベル{}になりました。", level))
+                        .await
+                        .unwrap();
+                    sqlx::query!(
+                        "UPDATE User SET Level = ?, Point = ? WHERE Userid = ?",
+                        level,
+                        0,
+                        msg.author.id.0
+                    )
+                    .execute(&pool)
                     .await
                     .unwrap();
-            },
+                } else {
+                    sqlx::query!(
+                        "UPDATE User SET Point = ? WHERE UserId = ?",
+                        point,
+                        msg.author.id.0
+                    )
+                    .execute(&pool)
+                    .await
+                    .unwrap();
+                }
+            }
             Err(_) => {
-                sqlx::query!("INSERT INTO Point(UserId, Point) VALUES(?, ?)", msg.author.id.0, 1)
-                    .execute(&*pool)
-                    .await
-                    .unwrap();
+                sqlx::query!(
+                    "INSERT INTO User(UserId, Point, Level) VALUES(?, ?, ?)",
+                    msg.author.id.0,
+                    0,
+                    1
+                )
+                .execute(&pool)
+                .await
+                .unwrap();
             }
         }
     }
@@ -103,17 +130,18 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command]
 async fn check(ctx: &Context, msg: &Message) -> CommandResult {
-    let pool = get_pool(&ctx).await;
-    let recs = sqlx::query!("SELECT Point FROM Point WHERE UserId = ?", msg.author.id.0)
+    let pool = get_pool(ctx).await;
+    let recs = sqlx::query!("SELECT Level FROM User WHERE UserId = ?", msg.author.id.0)
         .fetch_one(&pool)
         .await;
     match recs {
         Ok(rec) => {
-            let point = rec.Point.unwrap();
-            msg.reply(ctx, format!("あなたのポイントは{}です。", point)).await?;
-        },
+            let level = rec.Level.unwrap();
+            msg.reply(ctx, format!("あなたのレベルは{}です。", level))
+                .await?;
+        }
         Err(_) => {
-            msg.reply(ctx, "あなたはまだポイントを持っていません").await?;
+            msg.reply(ctx, "データがありません").await?;
         }
     }
     Ok(())

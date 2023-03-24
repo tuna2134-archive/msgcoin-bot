@@ -1,4 +1,5 @@
-CREATE TABLE IF NOT EXISTS Point (
+CREATE TABLE IF NOT EXISTS User (
     UserId BIGINT,
-    Point INT
+    Point INT,
+    Level INT
 );
